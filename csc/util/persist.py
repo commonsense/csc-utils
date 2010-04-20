@@ -3,7 +3,10 @@ import cPickle as pickle
 import base64
 import logging
 import itertools
-from csc.divisi.dict_mixin import MyDictMixin as DictMixin # FIXME: divisi dependency
+from UserDict import DictMixin as DictMixin_
+
+# Hack: Make DictMixin a new-style class.
+class DictMixin(object, DictMixin_): pass
 
 def pkl_find_global(module_name, class_name):
     if module_name == 'csc.conceptnet4.analogyspace' and 'Tensor' in class_name:
@@ -455,6 +458,9 @@ class PickleDict(DictMixin):
 
     def __iter__(self):
         return (self.key_for_path(filename) for filename in os.listdir(self.dir) if filename != '_meta')
+
+    def keys(self):
+        return list(self.__iter__())
 
     def has_key(self, key):
         return (self.store_metadata and key == '_meta') or os.path.exists(self.path_for_key(key))
