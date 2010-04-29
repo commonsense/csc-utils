@@ -8,12 +8,12 @@ Includes:
 * A `cached` decorator for Django
 * A generator for the "sampling sequence" (binary van der Corput sequence),
   useful for incremental resolution on graphs.
-* A dictionary that stores its items as pickles in a directory. Includes
-  lazy-load and lazy-evaluation.
+* A dictionary that stores its items as pickles in a directory. Features
+  lazy loading and lazy evaluation.
 
-Plus a few more random things, and more to come."""
+Plus a few more odds and ends."""
 
-version_str = '0.4.2'
+version_str = '0.4.3'
 
 try:
     from setuptools import setup, Extension
