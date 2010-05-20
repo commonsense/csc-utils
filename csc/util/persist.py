@@ -87,69 +87,6 @@ class ItemToAttrAdaptor(object):
         # This is only useful for Python 2.6+.
         return self._obj.keys() + [x for x in i2a_passthrough if hasattr(self._obj, x)]
 
-import weakref
-class MaybeWeakValueDict(DictMixin):
-    '''
-    weakref.WeakValueDictionary is awesome, except that you can't store certain things in it.
-
-    So this keeps a WeakValueDictionary and a fallback dict.
-
-    >>> w = weakref.WeakValueDictionary()
-    >>> w[1] = 1
-    Traceback (most recent call last):
-       ...
-    TypeError: cannot create weak reference to 'int' object
-
-    >>> aset = set([1,2,3])
-    >>> w[1] = aset # (ok)
-
-    >>> d = MaybeWeakValueDict()
-    >>> d[1] = 1
-    >>> d[1] = aset
-    >>> d[1]
-    set([1, 2, 3])
-    >>> 1 in d
-    True
-    >>> del d[1]
-    >>> 1 in d
-    False
-    
-    '''
-    def __init__(self, dct=None):
-        self.weak = weakref.WeakValueDictionary()
-        self.normal = dict()
-        if dct is not None:
-            self.update(dct)
-
-    def __getitem__(self, key):
-        if key in self.weak:
-            return self.weak[key]
-        return self.normal[key]
-
-    def __setitem__(self, key, val):
-        if key in self:
-            del self[key]
-        try:
-            self.weak[key] = val
-        except TypeError:
-            self.normal[key] = val
-
-    def __delitem__(self, key):
-        if key in self.weak:
-            try:
-                del self.weak[key]
-            except KeyError: pass # just in case the garbage collector ran.
-            assert key not in self.normal
-        else:
-            del self.normal[key]
-
-    def has_key(self, key):
-        return key in self.weak or key in self.normal
-
-    def __iter__(self):
-        return itertools.chain(self.weak, self.normal)
-
-    
             
     
 def human_readable_size(sz, multiplier=1000, sizes=['B', 'kB', 'MB', 'GB']):
@@ -345,7 +282,7 @@ class PickleDict(DictMixin):
         return path
 
     def clear_cache(self):
-        self.cache = {} #MaybeWeakValueDict()
+        self.cache = {}
 
     def _load(self, key):
         '''
