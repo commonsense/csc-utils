@@ -314,7 +314,7 @@ class PickleDict(DictMixin):
             return self.cache[key]
         else:
             data = self._load(key)
-            self.cache[key] = data
+            if not isinstance(data, MetaPickleDict): self.cache[key] = data
             return data
     
     def __setitem__(self, key, val):
