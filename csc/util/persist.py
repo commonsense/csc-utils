@@ -3,7 +3,7 @@ import cPickle as pickle
 import base64
 import logging
 import itertools
-from csc.divisi.dict_mixin import MyDictMixin as DictMixin # FIXME: divisi dependency
+from csc.util.dict_mixin import MyDictMixin as DictMixin
 
 def pkl_find_global(module_name, class_name):
     if module_name == 'csc.conceptnet4.analogyspace' and 'Tensor' in class_name:
