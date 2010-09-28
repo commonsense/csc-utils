@@ -1,7 +1,6 @@
-from csc.util.cache import cached
 from csc.util.seq import sampling_sequence
 
-__all__ = ['chunk', 'Status', 'ForEach', 'foreach', 'queryset_foreach', 'cached', 'sampling_sequence']
+__all__ = ['chunk', 'Status', 'ForEach', 'foreach', 'queryset_foreach', 'sampling_sequence']
 
 def run_doctests(mod):
     """
