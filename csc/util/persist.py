@@ -3,13 +3,9 @@ import cPickle as pickle
 import base64
 import logging
 import itertools
-from csc.divisi.dict_mixin import MyDictMixin as DictMixin # FIXME: divisi dependency
+from UserDict import DictMixin
 
 def pkl_find_global(module_name, class_name):
-    if module_name == 'csc.conceptnet4.analogyspace' and 'Tensor' in class_name:
-        logging.warn("Transforming a special CNet tensor into just a plain old LabeledView.")
-        from csc.divisi.labeled_view import LabeledView
-        return LabeledView
     return getattr(__import__(module_name, None, None, ['']), class_name) # FIXME: not exactly the right way to import a module.
 
 def unpickle(f):
