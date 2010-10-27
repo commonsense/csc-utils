@@ -13,7 +13,7 @@ Includes:
 
 Plus a few more odds and ends."""
 
-version_str = '0.5'
+version_str = '0.5.1'
 
 try:
     from setuptools import setup, Extension
