@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-"""A set of utility functions for Python and Django that the Commonsense Computing project uses in multiple projects.
+"""A set of utility functions for Python that the Commonsense Computing project uses in multiple projects.
 
 Includes:
 
+* Simple natural language tools with as few dependencies as possible
 * A `foreach` with progress reporting (also Status.reporter)
-* A `cached` decorator for Django
 * A generator for the "sampling sequence" (binary van der Corput sequence),
   useful for incremental resolution on graphs.
 * A dictionary that stores its items as pickles in a directory. Features
@@ -13,7 +13,7 @@ Includes:
 
 Plus a few more odds and ends."""
 
-version_str = '0.4.3'
+version_str = '0.5.1'
 
 try:
     from setuptools import setup, Extension
@@ -52,6 +52,6 @@ setup(
     description = doclines[0],
     classifiers = classifiers,
     long_description = "\n".join(doclines[2:]),
-    packages=['csc', 'csc.util'],
+    packages=['csc', 'csc.util', 'csc.nl'],
     namespace_packages = ['csc'],
 )
