@@ -68,8 +68,15 @@ class EuroNL(NLTools):
 
     @lazy_property
     def frequencies(self):
+        from csc.nl.models import Frequency
         return set([x.text for x in
                     Frequency.objects.filter(language__id=self.lang)])
+
+    @lazy_property
+    def all_concepts(self):
+        '''Set of all concept text strings (not model objects)'''
+        from csc.conceptnet.models import Concept
+        return set(Concept.objects.filter(language__id=self.lang, num_assertions__gt=CUTOFF).values_list('text', flat=True))
 
     @lazy_property
     def swapdict(self):
