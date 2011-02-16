@@ -1,0 +1,4 @@
+prune csc/nl/mblem/en_unlem
+prune csc/nl/lemmatize/setup
+recursive-include csc/nl *.txt
+include csc/nl/mblem/*.pickle

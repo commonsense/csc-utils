@@ -13,10 +13,23 @@ Includes:
 
 Plus a few more odds and ends."""
 
-version_str = '0.5.1'
+version_str = '0.5.3'
+
+languages = ['pt', 'nl', 'ja', 'en', 'fi', 'ko', 'fr', 'ar', 'it', 'es', 'hu', 'zh']
+packages = ['csc', 'csc.util', 'csc.nl', 'csc.nl.mblem'] + ['csc.nl.'+lang for lang in languages]
 
 try:
-    from setuptools import setup, Extension
+    from setuptools import setup, Extension, find_packages
+
+    # Verify the list of packages.
+    setuptools_packages = find_packages(exclude=[])
+    if set(packages) != set(setuptools_packages):
+        import sys
+        print >>sys.stderr, 'Missing or extraneous packages found.'
+        print >>sys.stderr, 'Extraneous:', list(set(packages) - set(setuptools_packages))
+        print >>sys.stderr, 'Missing:', list(set(setuptools_packages) - set(packages))
+        sys.exit(1)
+
 except ImportError:
     from distutils.core import setup, Extension
 import os.path, sys
@@ -51,7 +64,9 @@ setup(
     platforms = ["any"],
     description = doclines[0],
     classifiers = classifiers,
+    package_data={'csc.nl': ['mblem/*.pickle', 'en/*.txt', 'es/stop.txt',
+                             'hu/stop.txt', 'nl/stop.txt', 'pt/stop.txt']},
     long_description = "\n".join(doclines[2:]),
-    packages=['csc', 'csc.util', 'csc.nl'],
+    packages=packages,
     namespace_packages = ['csc'],
 )
