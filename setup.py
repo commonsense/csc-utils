@@ -13,6 +13,10 @@ Includes:
 Plus a few more odds and ends."""
 
 version_str = '0.6'
+packages=['csc_utils', 'csc', 'csc.conceptnet', 'csc.conceptnet4',
+          'csc.concepttools', 'csc.corpus', 'csc.divisi2',
+          'csc.django_settings', 'csc.lib', 'csc.nl',
+          'csc.pseudo_auth', 'csc.util', 'csc.webapi']
 
 try:
     from setuptools import setup, Extension, find_packages
@@ -63,9 +67,6 @@ setup(
     package_data={'csc.nl': ['mblem/*.pickle', 'en/*.txt', 'es/stop.txt',
                              'hu/stop.txt', 'nl/stop.txt', 'pt/stop.txt']},
     long_description = "\n".join(doclines[2:]),
-    packages=['csc_utils', 'csc', 'csc.conceptnet', 'csc.conceptnet4',
-              'csc.concepttools', 'csc.corpus', 'csc.divisi2',
-              'csc.django_settings', 'csc.lib', 'csc.nl',
-              'csc.pseudo_auth', 'csc.util', 'csc.webapi'],
+    packages=packages,
     namespace_packages=['csc'],
 )
