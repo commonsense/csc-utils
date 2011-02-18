@@ -4,7 +4,6 @@
 
 Includes:
 
-* Simple natural language tools with as few dependencies as possible
 * A `foreach` with progress reporting (also Status.reporter)
 * A generator for the "sampling sequence" (binary van der Corput sequence),
   useful for incremental resolution on graphs.
@@ -13,7 +12,7 @@ Includes:
 
 Plus a few more odds and ends."""
 
-version_str = '0.5.1'
+version_str = '0.6'
 
 try:
     from setuptools import setup, Extension
@@ -45,13 +44,15 @@ setup(
     version=version_str,
     maintainer='MIT Media Lab, Software Agents group',
     maintainer_email='conceptnet@media.mit.edu',     
-    url='http://divisi.media.mit.edu/',
+    url='http://csc.media.mit.edu/',
     download_url='http://divisi.media.mit.edu/dist/csc-util-%s.tar.gz' % version_str,
     license = "http://www.gnu.org/copyleft/gpl.html",
     platforms = ["any"],
     description = doclines[0],
     classifiers = classifiers,
     long_description = "\n".join(doclines[2:]),
-    packages=['csc', 'csc.util', 'csc.nl'],
-    namespace_packages = ['csc'],
+    packages=['csc_utils', 'csc', 'csc.conceptnet', 'csc.conceptnet4',
+              'csc.concepttools', 'csc.corpus', 'csc.divisi2',
+              'csc.django_settings', 'csc.lib', 'csc.nl',
+              'csc.pseudo_auth', 'csc.util', 'csc.webapi'],
 )
