@@ -14,7 +14,7 @@ Plus a few more odds and ends."""
 
 version_str = '0.6'
 packages=['csc_utils', 'csc', 'csc.conceptnet', 'csc.conceptnet4',
-          'csc.concepttools', 'csc.corpus', 'csc.divisi2',
+          'csc.concepttools', 'csc.corpus', 'csc.divisi2', 'csc.divisi2.algorithms',
           'csc.django_settings', 'csc.lib', 'csc.nl',
           'csc.pseudo_auth', 'csc.util', 'csc.webapi']
 

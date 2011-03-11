@@ -1,5 +1,2 @@
-import os
-import divisi2
-__path__ = [os.path.dirname(divisi2.__file__)]
-globals().update(divisi2.__dict__)
-
+# Import everything from divisi2 for backwards compatibility.
+globals().update(dict(__import__('divisi2', [], [], 'hack').__dict__, __path__=__path__))
