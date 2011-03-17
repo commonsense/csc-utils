@@ -1,5 +1,5 @@
-from csc.util.cache import cached
-from csc.util.seq import sampling_sequence
+from csc_utils.cache import cached
+from csc_utils.seq import sampling_sequence
 
 #__all__ = ['chunk', 'Status', 'ForEach', 'foreach', 'queryset_foreach', 'cached', 'sampling_sequence']
 
