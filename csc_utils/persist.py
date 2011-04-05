@@ -543,4 +543,3 @@ class MetaPickleDict(PickleDict):
         super(MetaPickleDict, self).__init__(dir, gzip=False, store_metadata=False, log=False)
         
 
-PickleDir = PickleDict
