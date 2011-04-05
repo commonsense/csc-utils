@@ -543,3 +543,68 @@ class MetaPickleDict(PickleDict):
         super(MetaPickleDict, self).__init__(dir, gzip=False, store_metadata=False, log=False)
         
 
+###
+### PickleClass
+###
+class PickleClass(object):
+    '''A class with lazy members that store their results in a PickleDict.
+
+    Use this class carefully. Lazy results are never automatically recomputed.
+
+    To define a member as lazy, use the Lazy descriptor:
+
+    >>> import tempfile
+    >>> dirname = tempfile.mkdtemp()
+    >>> class Model(PickleClass):
+    ...     @Lazy
+    ...     def answer(self):
+    ...         print 'Called'
+    ...         return 42
+    >>> m = Model(dirname)
+    >>> m.answer
+    Called
+    42
+    >>> m.answer
+    42
+
+    "deleting" the attribute deletes the stored value, causing it to be recomputed on next access:
+
+    >>> del m.answer
+    >>> m.answer
+    Called
+    42
+    '''
+    def __init__(self, path):
+        self._pd = PickleDict(path, store_metadata=False)
+
+class Lazy(object):
+    def __init__(self, method, *a, **kw):
+        import inspect
+        if a or kw or not inspect.isfunction(method):
+            self.args = [method]+args
+            self.kwargs = kw
+            self.method = None
+        else:
+            self.args = []
+            self.kwargs = {}
+            self.method = method
+
+    def __call__(self, method):
+        assert self.method is None
+        self.method = method
+
+    def get_lazy_thunk(self, instance):
+        from functools import wraps
+        @instance._pd.lazy(*self.args, **self.kwargs)
+        @wraps(self.method)
+        def lazy_thunk():
+            return self.method(instance)
+        return lazy_thunk
+
+    def __get__(self, instance, owner):
+        if instance is None: raise AttributeError("Needs an instance.")
+        return self.get_lazy_thunk(instance)()
+
+    def __delete__(self, instance):
+        del instance._pd[self.get_lazy_thunk(instance).key]
+
