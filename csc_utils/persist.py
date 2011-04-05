@@ -556,14 +556,17 @@ class PickleClass(object):
     >>> import tempfile
     >>> dirname = tempfile.mkdtemp()
     >>> class Model(PickleClass):
-    ...     @Lazy
+    ...     @lazy
     ...     def answer(self):
     ...         print 'Called'
     ...         return 42
+    ...     @lazy
+    ...     def answers(self):
+    ...         return (self.answer, self.answer)
     >>> m = Model(dirname)
-    >>> m.answer
+    >>> m.answers
     Called
-    42
+    (42, 42)
     >>> m.answer
     42
 
@@ -577,7 +580,11 @@ class PickleClass(object):
     def __init__(self, path):
         self._pd = PickleDict(path, store_metadata=False)
 
-class Lazy(object):
+class lazy(object):
+    '''A lazy method descriptor. Think of it as replacing ``@property``.
+
+    For more documentation, see PickleClass.
+    '''
     def __init__(self, method, *a, **kw):
         import inspect
         if a or kw or not inspect.isfunction(method):
