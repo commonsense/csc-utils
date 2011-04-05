@@ -409,6 +409,7 @@ class PickleDict(DictMixin):
             return default_value
 
     def set_meta(self, key, meta_key, value):
+        if not self.store_metadata: return
         meta = self['_meta']
         meta_for_key = meta.get(key, {})
         meta_for_key[meta_key] = value
