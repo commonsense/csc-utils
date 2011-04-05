@@ -504,6 +504,7 @@ class PickleDict(DictMixin):
             recalculate.__doc__ = 'Unconditionally recalculates %s, and stores and returns the result.' % key
             f.recalculate = recalculate
             f.func = thunk
+            f.key = key
             return f
         return dec
 
