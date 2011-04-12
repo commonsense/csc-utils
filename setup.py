@@ -13,10 +13,11 @@ Includes:
 Plus a few more odds and ends."""
 
 version_str = '0.6'
+languages = ['pt', 'nl', 'ja', 'en', 'fi', 'ko', 'fr', 'ar', 'it', 'es', 'hu', 'zh', 'mblem']
 packages=['csc_utils', 'csc', 'csc.conceptnet', 'csc.conceptnet4',
           'csc.concepttools', 'csc.corpus', 'csc.divisi2', 'csc.divisi2.algorithms',
           'csc.django_settings', 'csc.lib', 'csc.nl',
-          'csc.pseudo_auth', 'csc.util', 'csc.webapi']
+          'csc.pseudo_auth', 'csc.util', 'csc.webapi'] + ['csc.nl.'+lang for lang in languages]
 
 try:
     from setuptools import setup, Extension, find_packages
