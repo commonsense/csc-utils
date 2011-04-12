@@ -1,5 +1,2 @@
-import os
-import simplenlp
-__path__ = [os.path.dirname(simplenlp.__file__)]
-globals().update(simplenlp.__dict__)
-
+# Import everything from simplenlp for backwards compatibility.
+globals().update(dict(__import__('simplenlp', [], [], 'hack').__dict__, __path__=__path__))
