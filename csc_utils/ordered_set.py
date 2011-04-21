@@ -461,7 +461,6 @@ class PrioritySet(OrderedSet):
         """
         Tell all registered listeners that we dropped a key.
         """
-        print "dropping key: %r" % key
         for listener in self.drop_listeners:
             listener(index, key)
 
