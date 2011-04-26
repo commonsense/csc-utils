@@ -12,7 +12,7 @@ Includes:
 
 Plus a few more odds and ends."""
 
-version_str = '0.6'
+version_str = '0.6.1'
 languages = ['pt', 'nl', 'ja', 'en', 'fi', 'ko', 'fr', 'ar', 'it', 'es', 'hu', 'zh', 'mblem']
 packages=['csc_utils', 'csc', 'csc.conceptnet', 'csc.conceptnet4',
           'csc.concepttools', 'csc.corpus', 'csc.divisi2', 'csc.divisi2.algorithms',
