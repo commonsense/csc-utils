@@ -3,23 +3,11 @@ import cPickle as pickle
 import base64
 import logging
 import itertools
-from UserDict import DictMixin as DictMixin_
-
-# Hack: Make DictMixin a new-style class.
-class DictMixin(object, DictMixin_): pass
-
-def pkl_find_global(module_name, class_name):
-    if module_name == 'csc.conceptnet4.analogyspace' and 'Tensor' in class_name:
-        logging.warn("Transforming a special CNet tensor into just a plain old LabeledView.")
-        from csc.divisi.labeled_view import LabeledView
-        return LabeledView
-    return getattr(__import__(module_name, None, None, ['']), class_name) # FIXME: not exactly the right way to import a module.
+from UserDict import DictMixin
 
 def unpickle(f):
     if isinstance(f, basestring): f = open(f, 'rb')
-    unpickler = pickle.Unpickler(f)
-    unpickler.find_global = pkl_find_global
-    return unpickler.load()
+    return pickle.load(f)
 
 def get_picklecached_thing(filename, func=None, name=None):
     # This functionality is superceded by PickleDict.get_lazy.
@@ -43,11 +31,7 @@ def get_picklecached_thing(filename, func=None, name=None):
         pickle.dump(result, f, -1)
         f.close()
     return result
-
-# the short, 1-argument version that Rob wants because pickle.load
-# isn't easy enough
-def load_pickle(filename):
-    return get_picklecached_thing(filename)
+load_pickle = get_picklecached_thing
 
 # List of things never to try to forward to the base object, because they're
 # just part of various dynamic introspection stuff. (er... IPython.)
@@ -115,7 +99,7 @@ def get_ipython_history(num_entries=15):
             if item and not item.startswith('?') and not item.endswith('?')][-num_entries:]
     
 
-class PickleDict(DictMixin):
+class PickleDict(object, DictMixin):
     '''
     A PickleDict is a dict that dumps its values as pickles in a
     directory. It makes a convenient dumping ground for temporary
