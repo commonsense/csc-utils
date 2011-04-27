@@ -216,7 +216,7 @@ class PickleDict(object, DictMixin):
     __slots__ = ['logger', 'log', 'dir', 'gzip', 'store_metadata', 'history_len', 'cache']
     
     def __init__(self, dir, gzip=False, store_metadata=True, log=True, context_history_len=20):
-        self.logger = logging.getLogger('csc.util.persist.PickleDict')
+        self.logger = logging.getLogger('csc_utils.persist.PickleDict')
         self.log = log
         self.dir = os.path.abspath(os.path.expanduser(dir))
         self.gzip = gzip
