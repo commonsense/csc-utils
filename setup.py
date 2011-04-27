@@ -1,17 +1,5 @@
 #!/usr/bin/env python
 
-"""A set of utility functions for Python that the Commonsense Computing project uses in multiple projects.
-
-Includes:
-
-* A `foreach` with progress reporting (also Status.reporter)
-* A generator for the "sampling sequence" (binary van der Corput sequence),
-  useful for incremental resolution on graphs.
-* A dictionary that stores its items as pickles in a directory. Features
-  lazy loading and lazy evaluation.
-
-Plus a few more odds and ends."""
-
 version_str = '0.6.1'
 languages = ['pt', 'nl', 'ja', 'en', 'fi', 'ko', 'fr', 'ar', 'it', 'es', 'hu', 'zh', 'mblem']
 packages=['csc_utils', 'csc', 'csc.conceptnet', 'csc.conceptnet4',
@@ -52,7 +40,8 @@ classifiers=[
     'Topic :: Software Development',
     'Topic :: Text Processing :: Linguistic',]
 
-doclines = __doc__.split("\n")
+README_contents = open(os.path.join(os.path.dirname(__file__), 'README.txt')).read()
+doclines = README_contents.split("\n")
 
 setup(
     name="csc-utils",
