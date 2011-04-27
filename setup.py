@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 version_str = '0.6.1'
-languages = ['pt', 'nl', 'ja', 'en', 'fi', 'ko', 'fr', 'ar', 'it', 'es', 'hu', 'zh', 'mblem']
-packages=['csc_utils', 'csc', 'csc.conceptnet', 'csc.conceptnet4',
-          'csc.concepttools', 'csc.corpus', 'csc.divisi2', 'csc.divisi2.algorithms',
-          'csc.django_settings', 'csc.lib', 'csc.nl',
-          'csc.pseudo_auth', 'csc.util', 'csc.webapi'] + ['csc.nl.'+lang for lang in languages]
+languages = ['pt', 'nl', 'ja', 'ja_cabocha', 'en', 'fi', 'ko', 'fr', 'ar', 'it', 'es', 'hu', 'zh', 'mblem']
+csc_packages = ['conceptnet', 'conceptnet4', 'concepttools', 'corpus', 'corpus.parse',
+                'divisi2', 'divisi2.algorithms', 'django_settings',
+                'lib', 'lib.voting', 'lib.voting.templatetags', 'lib.events',
+                'nl', 'pseudo_auth', 'util', 'webapi', 'webapi.templatetags']
+packages=['csc_utils', 'csc'] + ['csc.'+pkg for pkg in csc_packages] + ['csc.nl.'+lang for lang in languages]
 
 try:
     from setuptools import setup, Extension, find_packages
