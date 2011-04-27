@@ -65,8 +65,6 @@ setup(
     platforms = ["any"],
     description = doclines[0],
     classifiers = classifiers,
-    package_data={'csc.nl': ['mblem/*.pickle', 'en/*.txt', 'es/stop.txt',
-                             'hu/stop.txt', 'nl/stop.txt', 'pt/stop.txt']},
     long_description = "\n".join(doclines[2:]),
     packages=packages,
     namespace_packages=['csc'],
