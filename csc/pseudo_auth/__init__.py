@@ -1,5 +1,2 @@
-import os
-import conceptnet.pseudo_auth
-__path__ = [os.path.dirname(conceptnet.pseudo_auth.__file__)]
-globals().update(conceptnet.pseudo_auth.__dict__)
-
+# Import everything from conceptnet.pseudo_auth for backwards compatibility.
+globals().update(dict(__import__('conceptnet.pseudo_auth', [], [], 'hack').__dict__, __path__=__path__))
