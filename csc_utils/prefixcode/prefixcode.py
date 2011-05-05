@@ -5,6 +5,7 @@ import re
 
 Node = namedtuple('Node', ['value', 'freq', 'left', 'right'])
 CHARACTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#'
+ALPHANUM = re.compile(r'(^|[^0-9])([0-9])')
 
 def merge_nodes(node1, node2):
     return Node(node1.value + node2.value,
@@ -74,11 +75,8 @@ def show_prefix_code(codes, node, prefix='', consumed='', maxlen=18):
     if node.right:
         show_prefix_code(codes, node.right, prefix+'1', consumed, maxlen)
     
-print 'lexicon'
 WORDS = read_lexicon('lexicon.txt')
-print 'freqs'
 FREQS = make_tetragram_freqs(WORDS)
-print 'code'
 CODES = {}
 for char in CHARACTERS+'^':
     for char2 in CHARACTERS+'^':
@@ -138,7 +136,15 @@ def _walk_prefix_tree(word, key, node, consumed, length):
             length)
 
 def prefix_hash(text):
-    text = ubernormalize(text)
+    """
+    Given a short text (preferably no more than 2 or 3 words), get a
+    20-bit hash value for that text.
+    
+    This is designed so that you can actually place it into one of 2**20
+    buckets, and collisions will only occur between rare and very similar
+    strings.
+    """
+    text = ALPHANUM.sub(r'\1#\2', ubernormalize(text))
     if text in LEXICON:
         # known word
         # format: binary 00 followed by 18-bit index number
@@ -162,6 +168,17 @@ def prefix_hash(text):
             return (1<<18) + (binval<<6) + hashval
 
 def prefix_unhash(val):
+    """
+    prefix_hash is a particularly reversible hash. In many cases, you will 
+    be able to "unhash" it to exactly the same text that went in, or at least
+    to an abbreviation of that text.
+
+    This will return a unique, possibly human-readable string for each hash
+    value. Do not use this for output, but feel free to use it for debugging.
+
+    TODO: adjust prefix_hash so that the arbitrary prefix_unhash string
+    actually unhashes to the same thing.
+    """
     if val >= 1<<19:
         # multiple words
         bin1 = (val>>11) % 256
@@ -194,3 +211,16 @@ def prefix_unhash(val):
             return LEXICON[val].lower()
         except IndexError:
             return '???'
+
+def test_collisions(filename):
+    buckets = {}
+    for line in open(filename):
+        text = line.strip().replace('_', ' ').split(',')[0]
+        if text.count(' ') < 2:
+            bucket = prefix_hash(text)
+            if bucket in buckets:
+                other = buckets[bucket]
+                if ubernormalize(other) != ubernormalize(text):
+                    print "Hash collision: %s, %s, %s" % (buckets[bucket],
+                    text, prefix_unhash(bucket))
+            buckets[bucket] = text
