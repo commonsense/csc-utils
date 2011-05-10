@@ -206,6 +206,7 @@ class IdentitySet(object):
 
 def indexable_set(x, dim=None):
     if x is None:
+        assert dim is not None
         return IdentitySet(dim)
     if getattr(x, 'index_is_efficient', False):
         return x
