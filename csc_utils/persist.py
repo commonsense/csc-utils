@@ -418,7 +418,10 @@ class PickleDict(object, DictMixin):
         
         if key in self and self.get_meta(key, 'version', 0) == version:
             #logging.info('get_lazy: found %r.' % (key,))
-            return self[key]
+            try:
+                return self[key]
+            except:
+                if self.log: self.logger.warn("Error loading %r; recomputing.", key)
 
         if self.log: self.logger.info('get_lazy: computing %r.' % (key,))
         return self._compute(key, thunk, version)
