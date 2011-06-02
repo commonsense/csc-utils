@@ -1,3 +1,5 @@
+from __future__ import with_statement
+from csc_utils.io import open_for_atomic_overwrite
 import os.path
 import cPickle as pickle
 import base64
@@ -27,9 +29,8 @@ def get_picklecached_thing(filename, func=None, name=None):
         print 'Computing', name
         result = func()
         print 'Saving', name
-        f = opener(filename, 'wb')
-        pickle.dump(result, f, -1)
-        f.close()
+        with open_for_atomic_overwrite(filename) as f:
+            pickle.dump(result, f, -1)
     return result
 load_pickle = get_picklecached_thing
 
@@ -304,12 +305,14 @@ class PickleDict(object, DictMixin):
     def __setitem__(self, key, val):
         if self.log: self.logger.info('Saving %r...', key)
         self.cache[key] = val
-        import gzip
-        opener = gzip.open if self.gzip else open
-        f = opener(self.path_for_key(key), 'wb')
-        pickle.dump(val, f, -1)
-        if self.log: self.logger.info('Saved %r (%s)', key, human_readable_size(f.tell()))
-        f.close()
+        with open_for_atomic_overwrite(self.path_for_key(key)) as f:
+            if self.gzip:
+                import gzip
+                f = gzip.GzipFile(fileobj=f)
+            pickle.dump(val, f, -1)
+            if self.gzip:
+                f.close()
+            if self.log: self.logger.info('Saved %r (%s)', key, human_readable_size(f.tell()))
 
         if self.store_metadata:
             meta = {}
