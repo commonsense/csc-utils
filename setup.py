@@ -1,23 +1,12 @@
 #!/usr/bin/env python
 
-"""A set of utility functions for Python that the Commonsense Computing project uses in multiple projects.
-
-Includes:
-
-* A `foreach` with progress reporting (also Status.reporter)
-* A generator for the "sampling sequence" (binary van der Corput sequence),
-  useful for incremental resolution on graphs.
-* A dictionary that stores its items as pickles in a directory. Features
-  lazy loading and lazy evaluation.
-
-Plus a few more odds and ends."""
-
 version_str = '0.6.1'
-languages = ['pt', 'nl', 'ja', 'en', 'fi', 'ko', 'fr', 'ar', 'it', 'es', 'hu', 'zh', 'mblem']
-packages=['csc_utils', 'csc', 'csc.conceptnet', 'csc.conceptnet4',
-          'csc.concepttools', 'csc.corpus', 'csc.divisi2', 'csc.divisi2.algorithms',
-          'csc.django_settings', 'csc.lib', 'csc.nl',
-          'csc.pseudo_auth', 'csc.util', 'csc.webapi'] + ['csc.nl.'+lang for lang in languages]
+languages = ['pt', 'nl', 'ja', 'ja_cabocha', 'en', 'fi', 'ko', 'fr', 'ar', 'it', 'es', 'hu', 'zh', 'mblem']
+csc_packages = ['conceptnet', 'conceptnet4', 'concepttools', 'corpus', 'corpus.parse',
+                'divisi2', 'divisi2.algorithms', 'django_settings',
+                'lib', 'lib.voting', 'lib.voting.templatetags', 'lib.events',
+                'nl', 'pseudo_auth', 'util', 'webapi', 'webapi.templatetags']
+packages=['csc_utils', 'csc'] + ['csc.'+pkg for pkg in csc_packages] + ['csc.nl.'+lang for lang in languages]
 
 try:
     from setuptools import setup, Extension, find_packages
@@ -52,7 +41,8 @@ classifiers=[
     'Topic :: Software Development',
     'Topic :: Text Processing :: Linguistic',]
 
-doclines = __doc__.split("\n")
+README_contents = open(os.path.join(os.path.dirname(__file__), 'README.txt')).read()
+doclines = README_contents.split("\n")
 
 setup(
     name="csc-utils",
@@ -65,8 +55,6 @@ setup(
     platforms = ["any"],
     description = doclines[0],
     classifiers = classifiers,
-    package_data={'csc.nl': ['mblem/*.pickle', 'en/*.txt', 'es/stop.txt',
-                             'hu/stop.txt', 'nl/stop.txt', 'pt/stop.txt']},
     long_description = "\n".join(doclines[2:]),
     packages=packages,
     namespace_packages=['csc'],

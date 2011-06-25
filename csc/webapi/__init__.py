@@ -1,5 +1,2 @@
-import os
-import conceptnet.webapi
-__path__ = [os.path.dirname(conceptnet.webapi.__file__)]
-globals().update(conceptnet.webapi.__dict__)
-
+# Import everything from conceptnet.webapi for backwards compatibility.
+globals().update(dict(__import__('conceptnet.webapi', [], [], 'hack').__dict__, __path__=__path__))

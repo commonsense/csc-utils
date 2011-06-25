@@ -1,5 +1,2 @@
-import os
-import conceptnet.corpus
-__path__ = [os.path.dirname(conceptnet.corpus.__file__)]
-globals().update(conceptnet.corpus.__dict__)
-
+# Import everything from conceptnet.corpus for backwards compatibility.
+globals().update(dict(__import__('conceptnet.corpus', [], [], 'hack').__dict__, __path__=__path__))

@@ -206,6 +206,7 @@ class IdentitySet(object):
 
 def indexable_set(x, dim=None):
     if x is None:
+        assert dim is not None
         return IdentitySet(dim)
     if getattr(x, 'index_is_efficient', False):
         return x
@@ -515,3 +516,44 @@ class PrioritySet(OrderedSet):
 
 # Allow this class to be used under its old name
 RecyclingSet = PrioritySet
+
+
+class HashSet(object):
+    def __init__(self, nbits):
+        if nbits < 1:
+            raise ValueError('HashSet nbits must be positive')
+        self._nbits = nbits
+        self._mask = 2**nbits - 1
+        self._data = [set() for i in xrange(2**nbits)]
+
+    def __len__(self):
+        return len(self._data)
+
+    def _hash(self, x):
+        return hash(x) & self._mask
+
+    def index(self, x):
+        h = self._hash(x)
+        if x in self.entries_with_index(h):
+            return h
+        else:
+            raise KeyError(x)
+
+    def add(self, x):
+        h = self._hash(x)
+        self._data[h].add(x)
+        return h
+
+    def items(self):
+        return list(self.iteritems())
+
+    def iteritems(self):
+        for idx, entries in enumerate(self._data):
+            for entry in entries:
+                yield entry, idx
+
+    def entries_with_index(self, index):
+        return self._data[index]
+
+    def __contains__(self, x):
+        return x in self.entries_with_index(self._hash(x))

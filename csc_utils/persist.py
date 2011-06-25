@@ -1,25 +1,15 @@
+from __future__ import with_statement
+from csc_utils.io import open_for_atomic_overwrite
 import os.path
 import cPickle as pickle
 import base64
 import logging
 import itertools
-from UserDict import DictMixin as DictMixin_
-
-# Hack: Make DictMixin a new-style class.
-class DictMixin(object, DictMixin_): pass
-
-def pkl_find_global(module_name, class_name):
-    if module_name == 'csc.conceptnet4.analogyspace' and 'Tensor' in class_name:
-        logging.warn("Transforming a special CNet tensor into just a plain old LabeledView.")
-        from csc.divisi.labeled_view import LabeledView
-        return LabeledView
-    return getattr(__import__(module_name, None, None, ['']), class_name) # FIXME: not exactly the right way to import a module.
+from UserDict import DictMixin
 
 def unpickle(f):
     if isinstance(f, basestring): f = open(f, 'rb')
-    unpickler = pickle.Unpickler(f)
-    unpickler.find_global = pkl_find_global
-    return unpickler.load()
+    return pickle.load(f)
 
 def get_picklecached_thing(filename, func=None, name=None):
     # This functionality is superceded by PickleDict.get_lazy.
@@ -39,15 +29,10 @@ def get_picklecached_thing(filename, func=None, name=None):
         print 'Computing', name
         result = func()
         print 'Saving', name
-        f = opener(filename, 'wb')
-        pickle.dump(result, f, -1)
-        f.close()
+        with open_for_atomic_overwrite(filename) as f:
+            pickle.dump(result, f, -1)
     return result
-
-# the short, 1-argument version that Rob wants because pickle.load
-# isn't easy enough
-def load_pickle(filename):
-    return get_picklecached_thing(filename)
+load_pickle = get_picklecached_thing
 
 # List of things never to try to forward to the base object, because they're
 # just part of various dynamic introspection stuff. (er... IPython.)
@@ -115,7 +100,7 @@ def get_ipython_history(num_entries=15):
             if item and not item.startswith('?') and not item.endswith('?')][-num_entries:]
     
 
-class PickleDict(DictMixin):
+class PickleDict(object, DictMixin):
     '''
     A PickleDict is a dict that dumps its values as pickles in a
     directory. It makes a convenient dumping ground for temporary
@@ -232,7 +217,7 @@ class PickleDict(DictMixin):
     __slots__ = ['logger', 'log', 'dir', 'gzip', 'store_metadata', 'history_len', 'cache']
     
     def __init__(self, dir, gzip=False, store_metadata=True, log=True, context_history_len=20):
-        self.logger = logging.getLogger('csc.util.persist.PickleDict')
+        self.logger = logging.getLogger('csc_utils.persist.PickleDict')
         self.log = log
         self.dir = os.path.abspath(os.path.expanduser(dir))
         self.gzip = gzip
@@ -320,12 +305,14 @@ class PickleDict(DictMixin):
     def __setitem__(self, key, val):
         if self.log: self.logger.info('Saving %r...', key)
         self.cache[key] = val
-        import gzip
-        opener = gzip.open if self.gzip else open
-        f = opener(self.path_for_key(key), 'wb')
-        pickle.dump(val, f, -1)
-        if self.log: self.logger.info('Saved %r (%s)', key, human_readable_size(f.tell()))
-        f.close()
+        with open_for_atomic_overwrite(self.path_for_key(key)) as f:
+            if self.gzip:
+                import gzip
+                f = gzip.GzipFile(fileobj=f)
+            pickle.dump(val, f, -1)
+            if self.gzip:
+                f.close()
+            if self.log: self.logger.info('Saved %r (%s)', key, human_readable_size(f.tell()))
 
         if self.store_metadata:
             meta = {}
@@ -431,7 +418,10 @@ class PickleDict(DictMixin):
         
         if key in self and self.get_meta(key, 'version', 0) == version:
             #logging.info('get_lazy: found %r.' % (key,))
-            return self[key]
+            try:
+                return self[key]
+            except:
+                if self.log: self.logger.warn("Error loading %r; recomputing.", key)
 
         if self.log: self.logger.info('get_lazy: computing %r.' % (key,))
         return self._compute(key, thunk, version)
