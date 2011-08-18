@@ -1,7 +1,7 @@
 from csc_utils.seq import sampling_sequence
 from itertools import islice
 
-#__all__ = ['chunk', 'Status', 'ForEach', 'foreach', 'queryset_foreach', 'cached', 'sampling_sequence']
+__all__ = ['sampling_sequence', 'in_groups_of', 'run_doctests']
 
 def in_groups_of(size, iterator):
     iterator = iter(iterator)
