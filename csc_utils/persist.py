@@ -288,7 +288,7 @@ class PickleDict(object, DictMixin):
             import gzip
             data = unpickle(gzip.open(path))
         except IOError:
-            data = unpickle(open(path), 'rb')
+            data = unpickle(open(path, 'rb'))
 
         if self.log: self.logger.info('Loaded %r (%s).', key, type(data))
         return data
