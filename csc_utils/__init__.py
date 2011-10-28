@@ -1,19 +1,15 @@
-from csc_utils.cache import cached
 from csc_utils.seq import sampling_sequence
+from itertools import islice
 
-#__all__ = ['chunk', 'Status', 'ForEach', 'foreach', 'queryset_foreach', 'cached', 'sampling_sequence']
+__all__ = ['sampling_sequence', 'in_groups_of', 'run_doctests']
 
 def in_groups_of(size, iterator):
-    counter = 0
-    acc = []
-    for item in iterator:
-        acc.append(item)
-        counter += 1
-        if counter == size:
-            yield acc
-            acc = []
-            counter = 0
-    if acc: yield acc
+    iterator = iter(iterator)
+    while True:
+        acc = list(islice(iterator, size))
+        if not acc:
+            break
+        yield acc
 
 def run_doctests(mod):
     """
