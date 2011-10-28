@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-version_str = '0.6.2'
+version_str = '0.6.4'
 languages = ['pt', 'nl', 'ja', 'ja_cabocha', 'en', 'fi', 'ko', 'fr', 'ar', 'it', 'es', 'hu', 'zh', 'mblem']
 csc_packages = ['conceptnet', 'conceptnet4', 'concepttools', 'corpus', 'corpus.parse',
                 'divisi2', 'divisi2.algorithms', 'django_settings',
@@ -18,7 +18,7 @@ try:
         print >>sys.stderr, 'Missing or extraneous packages found.'
         print >>sys.stderr, 'Extraneous:', list(set(packages) - set(setuptools_packages))
         print >>sys.stderr, 'Missing:', list(set(setuptools_packages) - set(packages))
-        sys.exit(1)
+        #sys.exit(1)
 
 except ImportError:
     from distutils.core import setup, Extension

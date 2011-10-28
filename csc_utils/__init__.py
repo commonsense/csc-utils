@@ -1,4 +1,5 @@
 from csc_utils.seq import sampling_sequence
+from csc_utils.cache import cached
 from itertools import islice
 
 __all__ = ['sampling_sequence', 'in_groups_of', 'run_doctests']
