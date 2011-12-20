@@ -91,14 +91,6 @@ def human_readable_size(sz, multiplier=1000, sizes=['B', 'kB', 'MB', 'GB']):
         sz = sz / float(multiplier)
     return '%.2f%s' % (sz, name)
 
-def get_ipython_history(num_entries=15):
-    from IPython import ipapi
-    ip = ipapi.get()
-    if ip is None: return None
-    input_lines = [item.strip() for item in ip.user_ns['In']]
-    return [item for item in input_lines
-            if item and not item.startswith('?') and not item.endswith('?')][-num_entries:]
-    
 
 class PickleDict(object, DictMixin):
     '''
@@ -198,9 +190,6 @@ class PickleDict(object, DictMixin):
 
     >>> pd['_meta']['the_answer']['type'] == str(int)
     True
-
-    If you were running from within IPython, the metadata dict also
-    includes 'context', which holds your last 15 IPython inputs.
 
     There's a friendlier interface to getting metadata too:
 
@@ -317,12 +306,6 @@ class PickleDict(object, DictMixin):
         if self.store_metadata:
             meta = {}
             meta['type'] = str(type(val))
-
-            # Add IPython history
-            try:
-                meta['context'] = get_ipython_history(num_entries=self.history_len)
-            except ImportError:
-                pass
             self['_meta'][key] = meta
 
     def __delitem__(self, key):
