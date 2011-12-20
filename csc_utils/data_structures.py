@@ -21,35 +21,3 @@ def nested_list_to_dict(ndarray):
     for them also.
     '''
     return dict(nested_list_items(ndarray))
-
-def copy(obj):
-    """
-    Make a copy of obj if it's mutable. Handles a few common data types.
-
-    >>> print copy(None)
-    None
-
-    >>> a = [1, 2]
-    >>> b = copy(a)
-    >>> b == a
-    True
-    >>> b[1] = 0
-    >>> b == a
-    False
-    
-    >>> from csc.divisi.ordered_set import OrderedSet
-    >>> a = OrderedSet(['a', 'b', 'c'])
-    >>> b = copy(a)
-    >>> b == a
-    True
-    >>> b[1] = 'd'
-    >>> b == a
-    False
-    """
-    if obj is None or isinstance(obj, tuple) or isinstance(obj, basestring):
-        return obj
-    elif isinstance(obj, list):
-        return obj[:]
-    else:
-        return obj.copy()
-
