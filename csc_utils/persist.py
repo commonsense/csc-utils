@@ -100,7 +100,7 @@ class PickleDict(object, DictMixin):
 
     >>> import tempfile
     >>> dirname = tempfile.mkdtemp()
-    >>> pd = PickleDict(dirname)
+    >>> pd = PickleDict(dirname, extension='.pkl')
 
     Let's clear out the directory so the tests start from a known state.
     
@@ -113,7 +113,7 @@ class PickleDict(object, DictMixin):
     It keeps an internal cache, so to make sure it's actually storing
     persistently, let's make a new one.
 
-    >>> pd = PickleDict(dirname)
+    >>> pd = PickleDict(dirname, extension='.pkl')
     >>> pd['abc']
     123
 
@@ -123,6 +123,12 @@ class PickleDict(object, DictMixin):
     ['abc']
     >>> pd.items()
     [('abc', 123)]
+    >>> 'abc' in pd
+    True
+    >>> '' in pd
+    False
+    >>> 'blue' in pd
+    False
 
     If you're just using string keys, you can use the item-to-attr
     adaptor `d`:
@@ -203,13 +209,14 @@ class PickleDict(object, DictMixin):
     
     '''
     special_character = '+'
-    __slots__ = ['logger', 'log', 'dir', 'gzip', 'store_metadata', 'cache']
+    __slots__ = ['logger', 'log', 'dir', 'gzip', 'store_metadata', 'cache', 'extension']
     
-    def __init__(self, dir, gzip=False, store_metadata=True, log=True):
+    def __init__(self, dir, gzip=False, store_metadata=True, log=True, extension=''):
         self.logger = logging.getLogger('csc_utils.persist.PickleDict')
         self.log = log
         self.dir = os.path.abspath(os.path.expanduser(dir))
         self.gzip = gzip
+        self.extension = extension
         self.store_metadata = store_metadata
         if not os.path.isdir(self.dir):
             os.makedirs(self.dir)
@@ -241,6 +248,8 @@ class PickleDict(object, DictMixin):
         if not isinstance(key, basestring) or key.startswith(self.special_character) or '/' in key:
             for filename in os.listdir(self.dir):
                 if not filename.startswith(self.special_character): continue
+                if self.extension and filename.endswith(self.extension):
+                    filename = filename[:-len(self.extension)]
                 if self.key_for_path(filename) == key:
                     key = filename
                     break
@@ -250,6 +259,8 @@ class PickleDict(object, DictMixin):
         return os.path.join(self.dir, key)
 
     def key_for_path(self, path):
+        if self.extension and path.endswith(self.extension):
+            path = path[:-len(self.extension)]
         if path.startswith(self.special_character):
             return pickle.loads(base64.urlsafe_b64decode(path[1:]))
         return path
@@ -268,7 +279,9 @@ class PickleDict(object, DictMixin):
         if os.path.isdir(path):
             # Keep sub-PickleDict objects in cache, so that they
             # can cache their own data.
-            return PickleDict(path, gzip=self.gzip, store_metadata=self.store_metadata)
+            return PickleDict(path, gzip=self.gzip, store_metadata=self.store_metadata, extension=self.extension)
+        # Otherwise, expect an actual pickle object, so use the extension.
+        path = path + self.extension
         if not os.path.exists(path):
             raise KeyError(key)
         if self.log: self.logger.info('Loading %r...', key)
@@ -293,7 +306,7 @@ class PickleDict(object, DictMixin):
     def __setitem__(self, key, val):
         if self.log: self.logger.info('Saving %r...', key)
         self.cache[key] = val
-        with open_for_atomic_overwrite(self.path_for_key(key)) as f:
+        with open_for_atomic_overwrite(self.path_for_key(key) + self.extension) as f:
             if self.gzip:
                 import gzip
                 f = gzip.GzipFile(fileobj=f)
@@ -309,7 +322,7 @@ class PickleDict(object, DictMixin):
 
     def __delitem__(self, key):
         self.cache.pop(key, None) # don't fail if it's not cached.
-        os.remove(self.path_for_key(key))
+        os.remove(self.path_for_key(key) + self.extension)
 
 
     def _nuke(self):
@@ -353,7 +366,13 @@ class PickleDict(object, DictMixin):
         return self[name]
 
     def rename(self, old, new):
-        os.rename(self.path_for_key(old), self.path_for_key(new))
+        old_path = self.path_for_key(old)
+        new_path = self.path_for_key(new)
+        if not os.path.isdir(old_path):
+            old_path = old_path + self.extension
+            new_path = new_path + self.extension
+        os.rename(old_path, new_path)
+
         if old in self.cache:
             if not isinstance(self.cache[old], PickleDict):
                 self.cache[new] = self.cache[old]
@@ -369,7 +388,12 @@ class PickleDict(object, DictMixin):
         return list(self.__iter__())
 
     def has_key(self, key):
-        return (self.store_metadata and key == '_meta') or os.path.exists(self.path_for_key(key))
+        if key == '':
+            return False # Otherwise would match the directory itself.
+        if self.store_metadata and key == '_meta':
+            return True
+        path = self.path_for_key(key)
+        return os.path.exists(path) or os.path.exists(path+self.extension)
 
     def get_meta(self, key, meta_key, default_value=None):
         try:
