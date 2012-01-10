@@ -320,7 +320,7 @@ class PickleDict(object, DictMixin):
             return data
     
     def __setitem__(self, key, val):
-        if self.log: self.logger.info('Saving %r...', key)
+        if self.log: self.logger.info('Saving %r... (%s)', key, type(val))
         self.cache[key] = val
         with open_for_atomic_overwrite(self.path_for_key(key) + self.extension) as f:
             if self.gzip:
