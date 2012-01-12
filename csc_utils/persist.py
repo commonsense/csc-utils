@@ -6,10 +6,16 @@ import base64
 import logging
 import itertools
 from UserDict import DictMixin
+LOG = logging.getLogger(__name__)
 
 def unpickle(f):
     if isinstance(f, basestring): f = open(f, 'rb')
     return pickle.load(f)
+
+def save_pickle(obj, filename):
+    with open_for_atomic_overwrite(filename) as f:
+        pickle.dump(obj, f, -1)
+        return f.tell()
 
 def get_picklecached_thing(filename, func=None, name=None):
     # This functionality is superceded by PickleDict.get_lazy.
@@ -21,16 +27,15 @@ def get_picklecached_thing(filename, func=None, name=None):
         opener = open
     try:
         f = opener(filename, 'rb')
-        print 'Loading', name
+        LOG.info('Loading %s', name)
         result = unpickle(f)
         f.close()
     except IOError:
         if func is None: raise
-        print 'Computing', name
+        LOG.info('Computing %s', name)
         result = func()
-        print 'Saving', name
-        with open_for_atomic_overwrite(filename) as f:
-            pickle.dump(result, f, -1)
+        LOG.info('Saving %s', name)
+        save_pickle(result, filename)
     return result
 load_pickle = get_picklecached_thing
 
@@ -209,16 +214,16 @@ class PickleDict(object, DictMixin):
     
     '''
     special_character = '+'
-    __slots__ = ['logger', 'log', 'dir', 'gzip', 'store_metadata', 'cache', 'extension', 'pickler', 'unpickler']
+    __slots__ = ['logger', 'log', 'dir', 'store_metadata', 'cache', 'extension', 'load_pickle', 'save_pickle']
     
-    def __init__(self, dir, gzip=False, store_metadata=True, log=True, extension='', custom_persistence=None):
+    def __init__(self, dir, store_metadata=True, log=True, extension='', load_pickle=load_pickle, save_pickle=save_pickle):
         self.logger = logging.getLogger('csc_utils.persist.PickleDict')
         self.log = log
         self.dir = os.path.abspath(os.path.expanduser(dir))
-        self.gzip = gzip
         self.extension = extension
         self.store_metadata = store_metadata
-        self.custom_persistence = custom_persistence
+        self.load_pickle = load_pickle
+        self.save_pickle = save_pickle
         if not os.path.isdir(self.dir):
             os.makedirs(self.dir)
         self.clear_cache()
@@ -231,20 +236,6 @@ class PickleDict(object, DictMixin):
 
     @property
     def d(self): return ItemToAttrAdaptor(self)
-
-    def _pickler(self, f):
-        pickler = pickle.Pickler(f, -1)
-        if self.custom_persistence is not None:
-            persistent_id, persistent_load = self.custom_persistence
-            pickler.persistent_id = persistent_id
-        return pickler
-
-    def _unpickler(self, f):
-        unpickler = pickle.Unpickler(f)
-        if self.custom_persistence is not None:
-            persistent_id, persistent_load = self.custom_persistence
-            unpickler.persistent_load = persistent_load
-        return unpickler
 
     def path_for_key(self, key):
         # FIXME: This method is hugely inefficient but for the moment necessary.
@@ -294,19 +285,16 @@ class PickleDict(object, DictMixin):
         if os.path.isdir(path):
             # Keep sub-PickleDict objects in cache, so that they
             # can cache their own data.
-            return PickleDict(path, gzip=self.gzip, store_metadata=self.store_metadata,
-                              extension=self.extension, custom_persistence=self.custom_persistence)
+            return PickleDict(path, store_metadata=self.store_metadata,
+                              extension=self.extension,
+                              load_pickle=self.load_pickle,
+                              save_pickle=self.save_pickle)
         # Otherwise, expect an actual pickle object, so use the extension.
         path = path + self.extension
         if not os.path.exists(path):
             raise KeyError(key)
         if self.log: self.logger.info('Loading %r...', key)
-        try:
-            import gzip
-            data = self._unpickler(gzip.open(path)).load()
-        except IOError:
-            data = self._unpickler(open(path)).load()
-
+        data = self.load_pickle(path)
         if self.log: self.logger.info('Loaded %r (%s).', key, type(data))
         return data
         
@@ -322,14 +310,12 @@ class PickleDict(object, DictMixin):
     def __setitem__(self, key, val):
         if self.log: self.logger.info('Saving %r... (%s)', key, type(val))
         self.cache[key] = val
-        with open_for_atomic_overwrite(self.path_for_key(key) + self.extension) as f:
-            if self.gzip:
-                import gzip
-                f = gzip.GzipFile(fileobj=f)
-            self._pickler(f).dump(val)
-            if self.gzip:
-                f.close()
-            if self.log: self.logger.info('Saved %r (%s)', key, human_readable_size(f.tell()))
+        size = save_pickle(val, self.path_for_key(key) + self.extension)
+        if self.log:
+            if isinstance(size, int):
+                self.logger.info('Saved %r (%s)', key, human_readable_size(size))
+            else:
+                self.logger.info('Saved %r', key)
 
         if self.store_metadata:
             meta = {}
@@ -552,7 +538,7 @@ class PickleDict(object, DictMixin):
 
 class MetaPickleDict(PickleDict):
     def __init__(self, dir):
-        super(MetaPickleDict, self).__init__(dir, gzip=False, store_metadata=False, log=False)
+        super(MetaPickleDict, self).__init__(dir, store_metadata=False, log=False)
         
 
 ###
