@@ -316,7 +316,7 @@ class PickleDict(object, DictMixin):
     def __setitem__(self, key, val):
         if self.log: self.logger.info('Saving %r... (%s)', key, type(val))
         self.cache[key] = val
-        size = save_pickle(val, self.path_for_key(key) + self.extension)
+        size = self.save_pickle(val, self.path_for_key(key) + self.extension)
         if self.log:
             if isinstance(size, int):
                 self.logger.info('Saved %r (%s)', key, human_readable_size(size))
