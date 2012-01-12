@@ -179,6 +179,12 @@ class PickleDict(object, DictMixin):
     >>> pd['dir2'][7, 8]
     (9, 10)
 
+    ...and delete subdirectories also:
+
+    >>> del pd['dir2']
+    >>> 'dir2' in pd
+    False
+
     It can also lazily compute an expensive function only if the
     result is not already pickled. (This replaces
     get_picklecached_thing.)
@@ -323,26 +329,29 @@ class PickleDict(object, DictMixin):
             self['_meta'][key] = meta
 
     def __delitem__(self, key):
+        path = self.path_for_key(key)
+        if os.path.isdir(path):
+            self[key]._clear()
+            remaining = os.listdir(path)
+            if remaining:
+                raise RuntimeError(
+                    "PickleDict was trying to delete the subdirectory %s, but "
+                    "it still has the following files in it: %r"
+                    % (path, remaining))
+            else:
+                os.rmdir(path)
+        else:
+            os.remove(path + self.extension)
         self.cache.pop(key, None) # don't fail if it's not cached.
-        os.remove(self.path_for_key(key) + self.extension)
-
-
-    def _nuke(self):
-        '''
-        Destroy the directory tree, aka, ``rm -rf``.
-        '''
-        import shutil
-        shutil.rmtree(self.dir)
-        
         
     def _clear(self):
         '''
         Clear everything in the directory.
         '''
-        self._nuke()
-        os.makedirs(self.dir)
-        self.clear_cache()
-
+        for key in self:
+            del self[key]
+        if '_meta' in self:
+            del self['_meta']
     
     def clear(self):
         raise NotImplementedError("`clear`? Do you really mean that? If so, run _clear instead.")
