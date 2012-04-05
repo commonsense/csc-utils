@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-version_str = '0.6.2'
+version_str = '0.6.5'
 languages = ['pt', 'nl', 'ja', 'ja_cabocha', 'en', 'fi', 'ko', 'fr', 'ar', 'it', 'es', 'hu', 'zh', 'mblem']
 csc_packages = ['conceptnet', 'conceptnet4', 'concepttools', 'corpus', 'corpus.parse',
                 'divisi2', 'divisi2.algorithms', 'django_settings',
