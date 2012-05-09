@@ -3,6 +3,13 @@ from csc_utils.ordered_set import OrderedSet
 import networkx as nx
 log_2 = log(2)
 
+def load_graph(file):
+    if not isinstance(file, basestring):
+        file = open(file)
+    return nx.read_edgelist(file, encoding='utf-8', data=True,
+                            delimiter='\t',
+                            create_using=nx.MultiDiGraph())
+
 def set_conceptnet_weights(graph):
     """
     Given a ConceptNet-style graph representation, with a 'score' and 'freq'
@@ -55,6 +62,7 @@ def prune(graph, cutoff=1):
     ugraph = nx.Graph()
     ugraph.add_nodes_from(graph)
     ugraph.add_edges_from(graph.edges_iter())
+    ugraph.remove_edges_from(ugraph.selfloop_edges())
     cores = nx.find_cores(ugraph)
     core_nodes = [n for n in graph.nodes() if cores[n] >= cutoff]
     return graph.subgraph(core_nodes)
