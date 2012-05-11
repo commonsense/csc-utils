@@ -61,14 +61,18 @@ def pack64(vector):
     different values, giving you about 5 significant digits of accuracy.
     Of course, they all have to choose from the _same_ 2^18 fixed-point values.
     '''
+    prev_settings = np.seterr(divide='ignore')
 
     # Zero-dimensional and flag vectors
     K = len(vector)
     if K == 0:
+        np.seterr(**prev_settings)
         return 'A'
     if np.any(np.isnan(vector)):
+        np.seterr(**prev_settings)
         return 'n'
     elif np.any(np.isinf(vector)):
+        np.seterr(**prev_settings)
         return '_'
     
     # Calculate the smallest power of 2 we *don't* need to represent.
@@ -78,6 +82,7 @@ def pack64(vector):
     else: exponent = int(upper_bound) - 17
     if exponent > 23:
         # Overflow. Return the flag vector for "almost infinity".
+        np.seterr(**prev_settings)
         return '-'
     if exponent < -40:
         # Underflow. Lose some precision. Or maybe all of it.
@@ -94,6 +99,7 @@ def pack64(vector):
     # Now use the numbers we got as indices into our alphabet array, and
     # put the whole string together.
     indices = hexes.T.flatten()
+    np.seterr(**prev_settings)
     return base64_array[exponent+40] + base64_array[indices].tostring()
 
 def pack64_check(vector):
