@@ -4,6 +4,21 @@ base64_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz012345678
 base64_array = np.chararray((64,), buffer=base64_alphabet)
 log2 = np.log(2)
 
+def base64_index(c):
+    code = ord(c)
+    if 65 <= code < 91:     # if it's an uppercase letter:
+        return code-65      #   return its index in the alphabet
+    elif 97 <= code < 123:  # if it's a lowercase letter:
+        return code-71      #   return its index (code-97), plus 26
+    elif 48 <= code < 58:   # if it's a digit:
+        return code+4       #   return its value (code-48), plus 52
+    elif code == 45:        # if it's a hyphen, it's 62
+        return 62
+    elif code == 95:        # if it's an underscore, it's 63
+        return 63
+    else:
+        raise IndexError('Invalid base64 character')
+
 def pack64(vector):
     '''
     Packs a NumPy vector into a kind-of-floating-point, kind-of-base64
