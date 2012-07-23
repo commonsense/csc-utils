@@ -143,7 +143,7 @@ def unpack64(string):
     if string in '-_': raise OverflowError
     if string == 'n': raise ZeroDivisionError
     
-    hexes = np.array([base64_alphabet.index(c) for c in string], dtype=np.int32)
+    hexes = np.array([base64_index(c) for c in string], dtype=np.int32)
     exponent = hexes[0] - 40
     
     ints = hexes[3::3] + (hexes[2::3] << 6) + (hexes[1::3] << 12)
